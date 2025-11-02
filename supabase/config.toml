@@ -1,0 +1,4 @@
+project_id = "lduaychpcujnwksgpdhr"
+
+[functions.generate-paper]
+verify_jwt = false
