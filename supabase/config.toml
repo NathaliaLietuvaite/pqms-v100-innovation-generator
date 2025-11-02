@@ -2,3 +2,6 @@ project_id = "lduaychpcujnwksgpdhr"
 
 [functions.generate-paper]
 verify_jwt = false
+
+[functions.generate-code]
+verify_jwt = false

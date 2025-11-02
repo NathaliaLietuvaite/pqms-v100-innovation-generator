@@ -1,16 +1,19 @@
 import { useState } from "react";
 import { ConceptInput } from "@/components/ConceptInput";
 import { PaperOutput } from "@/components/PaperOutput";
+import { CodeOutput } from "@/components/CodeOutput";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Sparkles, BookOpen } from "lucide-react";
+import { Sparkles, BookOpen, Code2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Index = () => {
   const [generatedPaper, setGeneratedPaper] = useState<string>("");
+  const [generatedCode, setGeneratedCode] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleGenerate = async (concept: string) => {
+  const handleGeneratePaper = async (concept: string) => {
     setIsLoading(true);
     setGeneratedPaper("");
 
@@ -37,6 +40,40 @@ const Index = () => {
       toast({
         title: "Generation Failed",
         description: error instanceof Error ? error.message : "Failed to generate paper. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGenerateCode = async (concept: string) => {
+    setIsLoading(true);
+    setGeneratedCode("");
+
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-code', {
+        body: { concept }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data?.code) {
+        setGeneratedCode(data.code);
+        toast({
+          title: "Code Generated Successfully",
+          description: "Your V100 Python code has been generated.",
+        });
+      } else {
+        throw new Error("No code content received");
+      }
+    } catch (error) {
+      console.error("Error generating code:", error);
+      toast({
+        title: "Generation Failed",
+        description: error instanceof Error ? error.message : "Failed to generate code. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -82,14 +119,32 @@ const Index = () => {
             </p>
           </section>
 
-          {/* Input Section */}
-          <ConceptInput onGenerate={handleGenerate} isLoading={isLoading} />
-
-          {/* Output Section */}
-          {generatedPaper && <PaperOutput paper={generatedPaper} />}
+          {/* Tabbed Interface for Paper and Code Generation */}
+          <Tabs defaultValue="paper" className="w-full max-w-4xl mx-auto">
+            <TabsList className="grid w-full grid-cols-2 mb-8">
+              <TabsTrigger value="paper" className="gap-2">
+                <BookOpen className="h-4 w-4" />
+                Scientific Paper
+              </TabsTrigger>
+              <TabsTrigger value="code" className="gap-2">
+                <Code2 className="h-4 w-4" />
+                Python Code
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="paper" className="space-y-12">
+              <ConceptInput onGenerate={handleGeneratePaper} isLoading={isLoading} />
+              {generatedPaper && <PaperOutput paper={generatedPaper} />}
+            </TabsContent>
+            
+            <TabsContent value="code" className="space-y-12">
+              <ConceptInput onGenerate={handleGenerateCode} isLoading={isLoading} />
+              {generatedCode && <CodeOutput code={generatedCode} />}
+            </TabsContent>
+          </Tabs>
 
           {/* Framework Info */}
-          {!generatedPaper && !isLoading && (
+          {!generatedPaper && !generatedCode && !isLoading && (
             <section className="max-w-4xl mx-auto backdrop-blur-sm bg-card/20 p-8 rounded-xl border border-border/30">
               <h3 className="text-xl font-semibold mb-4">About the PQMS V100 Framework</h3>
               <div className="grid gap-4 text-sm text-muted-foreground">
