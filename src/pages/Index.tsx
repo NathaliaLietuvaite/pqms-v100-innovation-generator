@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ConceptInput } from "@/components/ConceptInput";
 import { PaperOutput } from "@/components/PaperOutput";
 import { CodeOutput } from "@/components/CodeOutput";
-import { Archive } from "@/components/Archive";
+import ChatBot from "@/components/ChatBot";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Sparkles, BookOpen, Code2 } from "lucide-react";
@@ -102,7 +102,7 @@ const Index = () => {
                 </p>
               </div>
             </div>
-            <Archive />
+            <ChatBot />
           </div>
         </div>
       </header>

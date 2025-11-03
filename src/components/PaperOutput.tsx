@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Copy, Download, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -22,38 +21,19 @@ export const PaperOutput = ({ paper, concept }: PaperOutputProps) => {
     for (const line of lines) {
       const trimmed = line.trim();
       if (trimmed.startsWith("# ")) {
+        // Capitalize first letter of each word after hyphens
         return trimmed
           .substring(2)
           .trim()
-          .replace(/[^a-zA-Z0-9\s]/g, "")
-          .replace(/\s+/g, "-")
-          .toLowerCase();
+          .replace(/[^a-zA-Z0-9äöüßÄÖÜ\s-]/g, '')
+          .replace(/\s+/g, '-')
+          .split('-')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+          .join('-');
       }
     }
     return `V100-Scientific-Paper-${new Date().toISOString().split("T")[0]}`;
   };
-
-  const saveToArchive = async () => {
-    try {
-      const title = extractTitle(paper);
-      const { error } = await supabase.from("archive").insert({
-        title,
-        content: paper,
-        type: "paper",
-        concept,
-      });
-
-      if (error) throw error;
-    } catch (error) {
-      console.error("Error saving to archive:", error);
-    }
-  };
-
-  useEffect(() => {
-    if (paper) {
-      saveToArchive();
-    }
-  }, [paper]);
 
   const handleCopy = async () => {
     try {
