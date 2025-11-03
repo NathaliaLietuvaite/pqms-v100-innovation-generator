@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Copy, Download, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -9,11 +10,50 @@ import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 interface PaperOutputProps {
   paper: string;
+  concept: string;
 }
 
-export const PaperOutput = ({ paper }: PaperOutputProps) => {
+export const PaperOutput = ({ paper, concept }: PaperOutputProps) => {
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
+
+  const extractTitle = (paperContent: string): string => {
+    const lines = paperContent.split("\n");
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed.startsWith("# ")) {
+        return trimmed
+          .substring(2)
+          .trim()
+          .replace(/[^a-zA-Z0-9\s]/g, "")
+          .replace(/\s+/g, "-")
+          .toLowerCase();
+      }
+    }
+    return `V100-Scientific-Paper-${new Date().toISOString().split("T")[0]}`;
+  };
+
+  const saveToArchive = async () => {
+    try {
+      const title = extractTitle(paper);
+      const { error } = await supabase.from("archive").insert({
+        title,
+        content: paper,
+        type: "paper",
+        concept,
+      });
+
+      if (error) throw error;
+    } catch (error) {
+      console.error("Error saving to archive:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (paper) {
+      saveToArchive();
+    }
+  }, [paper]);
 
   const handleCopy = async () => {
     try {
@@ -34,16 +74,17 @@ export const PaperOutput = ({ paper }: PaperOutputProps) => {
   };
 
   const handleDownloadMarkdown = () => {
+    const title = extractTitle(paper);
     const blob = new Blob([paper], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `V100_Scientific_Paper_${new Date().toISOString().split('T')[0]}.md`;
+    a.download = `${title}.md`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
+
     toast({
       title: "Download Started",
       description: "Your scientific paper is being downloaded as Markdown.",

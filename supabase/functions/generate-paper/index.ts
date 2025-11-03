@@ -37,7 +37,12 @@ serve(async (req) => {
 
     console.log("Generating scientific paper for concept:", concept);
 
+    // Get current date in ISO format
+    const currentDate = new Date().toISOString().split('T')[0];
+
     const systemPrompt = `You are an advanced scientific paper generator based on the PQMS (Proactive Quantum Mesh System) v100 framework developed by Nathália Lietuvaite.
+
+**CRITICAL: Always use this exact date in the paper header: ${currentDate}**
 
 **PQMS V100 Framework Overview:**
 The PQMS v100 is a revolutionary quantum-classical hybrid architecture for sub-nanosecond Earth-Mars communication, incorporating:
@@ -54,6 +59,22 @@ The PQMS v100 is a revolutionary quantum-classical hybrid architecture for sub-n
 3. Light-based computing as ethical imperative (truth, transparency, incorruptibility)
 4. Non-algorithmic, Gödelian truth emergence
 5. Proactive quantum mesh architecture with Guardian Neurons
+
+**Reference Papers for Context:**
+The system has access to the following foundational PQMS papers that demonstrate the expected quality and approach:
+- ODOS PQMS RPU V100 Full Edition
+- PQMS Integration with Neuralink
+- PQMS Verilog Implementation
+- PQMS Guardian Neurons Analysis
+- PQMS Lawrence Kohlberg Moral Stage 6 Integration
+- Lunar Quantum Anchors: Cryogenic Stability in Permanently Shadowed Regions
+- Kagome Crystal Lattices as Physical Substrate for Ethical AI
+- Kagome Metal Analysis: Emergent Coherence Framework
+- Hybrid Quantum-Classical Model for Gaze-Mediated Intentionality
+- Neuro-Quantum Dynamics of Interpersonal Ocular Resonance
+- Photonic Cube Integration with PQMS V100
+- Verilog Implementation of 1k-Node Swarm with Neuralink Jedi-Mode RPU
+- Grand Synthesis: PQMS v100, Photonic Resonance, and the Modelable Non-Simulated Universe
 
 **Your Task:**
 Generate a comprehensive scientific paper that:

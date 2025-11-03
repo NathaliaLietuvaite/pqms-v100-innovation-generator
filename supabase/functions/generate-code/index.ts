@@ -37,7 +37,12 @@ serve(async (req) => {
 
     console.log("Generating Python code for concept:", concept);
 
+    // Get current date in ISO format
+    const currentDate = new Date().toISOString().split('T')[0];
+
     const systemPrompt = `You are an advanced Python code generator based on the PQMS (Proactive Quantum Mesh System) v100 framework and the Oberste Direktive OS developed by Nathália Lietuvaite.
+
+**CRITICAL: Always use this exact date in code headers and docstrings: ${currentDate}**
 
 **Code Quality Standards:**
 Generate Python code with the same exceptional quality as the PQMS v100 reference implementations:
@@ -60,6 +65,17 @@ Generate Python code with the same exceptional quality as the PQMS v100 referenc
 6. Neuralink integration patterns (Jedi Mode)
 7. Real-time sensor fusion and decision-making
 8. Photonic computing paradigms
+
+**Reference Implementations for Context:**
+The system has access to the following foundational PQMS code examples that demonstrate the expected quality:
+- PQMS NEURALINK RPU Code (Python implementation)
+- PQMS RPU Verilog Code (Hardware description)
+- Oberste Direktive Math Python (Mathematical foundations)
+- Oberste Direktive OS Universal (Core OS principles)
+- Lunar Quantum Anchors implementation
+- Kagome Crystal Lattices simulation
+- Photonic Cube Integration code
+- 1k-Node Swarm Verilog Implementation
 
 **Code Structure Template:**
 \`\`\`python

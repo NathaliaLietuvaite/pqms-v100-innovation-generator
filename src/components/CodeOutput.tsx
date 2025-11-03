@@ -1,6 +1,8 @@
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Copy, Download, Code2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -8,10 +10,48 @@ import remarkGfm from 'remark-gfm';
 
 interface CodeOutputProps {
   code: string;
+  concept: string;
 }
 
-export const CodeOutput = ({ code }: CodeOutputProps) => {
+export const CodeOutput = ({ code, concept }: CodeOutputProps) => {
   const { toast } = useToast();
+
+  const extractTitle = (codeContent: string): string => {
+    const lines = codeContent.split("\n");
+    for (const line of lines) {
+      if (line.includes("Module:") || line.includes("File:")) {
+        return line
+          .split(":")[1]
+          .trim()
+          .replace(/[^a-zA-Z0-9\s]/g, "")
+          .replace(/\s+/g, "-")
+          .toLowerCase();
+      }
+    }
+    return `PQMS-V100-Generated-${Date.now()}`;
+  };
+
+  const saveToArchive = async () => {
+    try {
+      const title = extractTitle(code);
+      const { error } = await supabase.from("archive").insert({
+        title,
+        content: code,
+        type: "code",
+        concept,
+      });
+
+      if (error) throw error;
+    } catch (error) {
+      console.error("Error saving to archive:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (code) {
+      saveToArchive();
+    }
+  }, [code]);
 
   const copyToClipboard = async () => {
     try {
@@ -30,16 +70,17 @@ export const CodeOutput = ({ code }: CodeOutputProps) => {
   };
 
   const downloadCode = () => {
-    const blob = new Blob([code], { type: 'text/x-python' });
+    const title = extractTitle(code);
+    const blob = new Blob([code], { type: "text/x-python" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `PQMS_V100_Generated_${Date.now()}.py`;
+    a.download = `${title}.py`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
+
     toast({
       title: "Download Started",
       description: "Your Python code file is being downloaded.",

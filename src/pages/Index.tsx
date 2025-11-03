@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ConceptInput } from "@/components/ConceptInput";
 import { PaperOutput } from "@/components/PaperOutput";
 import { CodeOutput } from "@/components/CodeOutput";
+import { Archive } from "@/components/Archive";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Sparkles, BookOpen, Code2 } from "lucide-react";
@@ -10,12 +11,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 const Index = () => {
   const [generatedPaper, setGeneratedPaper] = useState<string>("");
   const [generatedCode, setGeneratedCode] = useState<string>("");
+  const [currentConcept, setCurrentConcept] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   const handleGeneratePaper = async (concept: string) => {
     setIsLoading(true);
     setGeneratedPaper("");
+    setCurrentConcept(concept);
 
     try {
       const { data, error } = await supabase.functions.invoke('generate-paper', {
@@ -50,6 +53,7 @@ const Index = () => {
   const handleGenerateCode = async (concept: string) => {
     setIsLoading(true);
     setGeneratedCode("");
+    setCurrentConcept(concept);
 
     try {
       const { data, error } = await supabase.functions.invoke('generate-code', {
@@ -86,16 +90,19 @@ const Index = () => {
       {/* Header */}
       <header className="border-b border-border/50 backdrop-blur-sm bg-card/30">
         <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Sparkles className="h-8 w-8 text-primary" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Sparkles className="h-8 w-8 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">PQMS V100 Innovation Generator</h1>
+                <p className="text-muted-foreground text-sm">
+                  Transforming Concepts into Comprehensive Scientific Papers
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">PQMS V100 Innovation Generator</h1>
-              <p className="text-muted-foreground text-sm">
-                Transforming Concepts into Comprehensive Scientific Papers
-              </p>
-            </div>
+            <Archive />
           </div>
         </div>
       </header>
@@ -134,12 +141,12 @@ const Index = () => {
             
             <TabsContent value="paper" className="space-y-12">
               <ConceptInput onGenerate={handleGeneratePaper} isLoading={isLoading} />
-              {generatedPaper && <PaperOutput paper={generatedPaper} />}
+              {generatedPaper && <PaperOutput paper={generatedPaper} concept={currentConcept} />}
             </TabsContent>
             
             <TabsContent value="code" className="space-y-12">
               <ConceptInput onGenerate={handleGenerateCode} isLoading={isLoading} />
-              {generatedCode && <CodeOutput code={generatedCode} />}
+              {generatedCode && <CodeOutput code={generatedCode} concept={currentConcept} />}
             </TabsContent>
           </Tabs>
 
