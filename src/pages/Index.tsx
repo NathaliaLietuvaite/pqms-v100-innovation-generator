@@ -1,12 +1,17 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ConceptInput } from "@/components/ConceptInput";
 import { PaperOutput } from "@/components/PaperOutput";
 import { CodeOutput } from "@/components/CodeOutput";
 import ChatBot from "@/components/ChatBot";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Sparkles, BookOpen, Code2 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Sparkles, BookOpen, Code2, LogOut, Shield } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { DEMO_PAPER, DEMO_CODE } from "@/data/demoContent";
 
 const Index = () => {
   const [generatedPaper, setGeneratedPaper] = useState<string>("");
@@ -14,8 +19,29 @@ const Index = () => {
   const [currentConcept, setCurrentConcept] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { user, session, loading, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast({
+      title: "Abgemeldet",
+      description: "Du wurdest erfolgreich abgemeldet.",
+    });
+  };
 
   const handleGeneratePaper = async (concept: string) => {
+    if (!user || !session) {
+      setGeneratedPaper(DEMO_PAPER);
+      setCurrentConcept("Demo-Beispiel");
+      toast({
+        title: "Demo-Modus",
+        description: "Melde dich an, um echte AI-generierte Inhalte zu erhalten.",
+        variant: "default",
+      });
+      return;
+    }
+
     setIsLoading(true);
     setGeneratedPaper("");
     setCurrentConcept(concept);
@@ -51,6 +77,17 @@ const Index = () => {
   };
 
   const handleGenerateCode = async (concept: string) => {
+    if (!user || !session) {
+      setGeneratedCode(DEMO_CODE);
+      setCurrentConcept("Demo-Beispiel");
+      toast({
+        title: "Demo-Modus",
+        description: "Melde dich an, um echte AI-generierte Inhalte zu erhalten.",
+        variant: "default",
+      });
+      return;
+    }
+
     setIsLoading(true);
     setGeneratedCode("");
     setCurrentConcept(concept);
@@ -85,6 +122,17 @@ const Index = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex items-center justify-center">
+        <div className="text-center">
+          <Sparkles className="h-12 w-12 text-primary animate-pulse mx-auto mb-4" />
+          <p className="text-muted-foreground">Lädt...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       {/* Header */}
@@ -102,7 +150,19 @@ const Index = () => {
                 </p>
               </div>
             </div>
-            <ChatBot />
+            <div className="flex items-center gap-3">
+              <ChatBot />
+              {user ? (
+                <Button variant="outline" size="sm" onClick={handleSignOut}>
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Abmelden
+                </Button>
+              ) : (
+                <Button variant="outline" size="sm" onClick={() => navigate("/auth")}>
+                  Anmelden
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -110,6 +170,18 @@ const Index = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-12">
         <div className="space-y-12">
+          {!user && (
+            <Alert className="max-w-4xl mx-auto bg-primary/5 border-primary/20">
+              <Shield className="h-4 w-4" />
+              <AlertDescription>
+                <strong>🔒 Sicherheitshinweis:</strong> Du befindest dich im Demo-Modus. 
+                Melde dich an, um vollständige AI-gestützte Generierung zu nutzen. 
+                Diese Maßnahme schützt das System vor unbefugter Nutzung und stellt sicher, 
+                dass keine fremden Kosten für dich entstehen.
+              </AlertDescription>
+            </Alert>
+          )}
+          
           {/* Introduction */}
           <section className="max-w-4xl mx-auto text-center space-y-4">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold">
