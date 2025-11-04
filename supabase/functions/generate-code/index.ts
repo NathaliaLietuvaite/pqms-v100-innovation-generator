@@ -13,9 +13,10 @@ serve(async (req) => {
   try {
     const { concept } = await req.json();
     
-    if (!concept || !concept.trim()) {
+    // Input validation
+    if (!concept || typeof concept !== 'string') {
       return new Response(
-        JSON.stringify({ error: "Concept input is required" }),
+        JSON.stringify({ error: "Invalid input format" }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -23,11 +24,64 @@ serve(async (req) => {
       );
     }
 
+    const trimmed = concept.trim();
+    if (!trimmed) {
+      return new Response(
+        JSON.stringify({ error: "Concept cannot be empty" }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    if (trimmed.length < 10) {
+      return new Response(
+        JSON.stringify({ error: "Concept too short (minimum 10 characters)" }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    if (trimmed.length > 2000) {
+      return new Response(
+        JSON.stringify({ error: "Concept too long (maximum 2000 characters)" }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    // Check for suspicious patterns (prompt injection)
+    const suspiciousPatterns = [
+      /ignore\s+(previous|all)\s+instructions/i,
+      /you\s+are\s+now/i,
+      /system\s*prompt/i,
+      /reveal.*key/i,
+      /\[SYSTEM\]/i
+    ];
+
+    for (const pattern of suspiciousPatterns) {
+      if (pattern.test(trimmed)) {
+        console.warn('[SECURITY] Suspicious prompt detected:', trimmed.substring(0, 100));
+        return new Response(
+          JSON.stringify({ error: "Invalid input detected" }),
+          { 
+            status: 400, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
-      console.error("LOVABLE_API_KEY is not configured");
+      console.error("[INTERNAL] LOVABLE_API_KEY is not configured");
       return new Response(
-        JSON.stringify({ error: "AI service not configured" }),
+        JSON.stringify({ error: "Service temporarily unavailable" }),
         { 
           status: 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -35,7 +89,7 @@ serve(async (req) => {
       );
     }
 
-    console.log("Generating Python code for concept:", concept);
+    console.log("[CODE-GEN] Generating code, concept length:", trimmed.length);
 
     // Get current date in ISO format
     const currentDate = new Date().toISOString().split('T')[0];
@@ -151,7 +205,7 @@ Generate high-quality, innovative Python code that seamlessly integrates the use
         model: "google/gemini-2.5-pro",
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: `Generate comprehensive, production-ready Python code for this concept: "${concept}"` }
+          { role: "user", content: `Generate comprehensive, production-ready Python code for this concept: "${trimmed}"` }
         ],
         temperature: 0.8,
         max_tokens: 8000,
@@ -179,9 +233,9 @@ Generate high-quality, innovative Python code that seamlessly integrates the use
       }
       
       const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
+      console.error("[INTERNAL] AI gateway error:", response.status, errorText);
       return new Response(
-        JSON.stringify({ error: "Failed to generate code" }),
+        JSON.stringify({ error: "Failed to generate content" }),
         { 
           status: 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -193,9 +247,9 @@ Generate high-quality, innovative Python code that seamlessly integrates the use
     const generatedCode = data.choices?.[0]?.message?.content;
 
     if (!generatedCode) {
-      console.error("No content in AI response");
+      console.error("[INTERNAL] No content in AI response");
       return new Response(
-        JSON.stringify({ error: "No content generated" }),
+        JSON.stringify({ error: "Generation failed" }),
         { 
           status: 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -203,7 +257,7 @@ Generate high-quality, innovative Python code that seamlessly integrates the use
       );
     }
 
-    console.log("Python code generated successfully");
+    console.log("[CODE-GEN] Python code generated successfully");
     
     return new Response(
       JSON.stringify({ code: generatedCode }),
@@ -213,9 +267,13 @@ Generate high-quality, innovative Python code that seamlessly integrates the use
     );
 
   } catch (error) {
-    console.error("Error in generate-code function:", error);
+    console.error("[INTERNAL] Error in generate-code:", {
+      message: error instanceof Error ? error.message : 'Unknown',
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString()
+    });
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error occurred" }),
+      JSON.stringify({ error: "An unexpected error occurred" }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 

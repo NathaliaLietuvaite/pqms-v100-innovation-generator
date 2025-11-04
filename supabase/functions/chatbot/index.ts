@@ -13,6 +13,7 @@ serve(async (req) => {
   try {
     const { messages } = await req.json();
     
+    // Input validation
     if (!messages || !Array.isArray(messages)) {
       return new Response(
         JSON.stringify({ error: "Invalid messages format" }),
@@ -20,11 +21,72 @@ serve(async (req) => {
       );
     }
 
+    const MAX_MESSAGES = 50;
+    const MAX_MESSAGE_LENGTH = 2000;
+    const MAX_TOTAL_LENGTH = 10000;
+
+    // Validate conversation length
+    if (messages.length > MAX_MESSAGES) {
+      return new Response(
+        JSON.stringify({ error: "Conversation too long" }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate each message
+    let totalLength = 0;
+    for (const msg of messages) {
+      if (!msg.role || !msg.content || typeof msg.content !== 'string') {
+        return new Response(
+          JSON.stringify({ error: "Invalid message structure" }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      if (msg.content.length > MAX_MESSAGE_LENGTH) {
+        return new Response(
+          JSON.stringify({ error: "Message too long" }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      totalLength += msg.content.length;
+    }
+
+    if (totalLength > MAX_TOTAL_LENGTH) {
+      return new Response(
+        JSON.stringify({ error: "Total conversation length exceeded" }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Check for prompt injection in the last user message
+    const lastUserMessage = messages[messages.length - 1];
+    if (lastUserMessage.role === 'user') {
+      const suspiciousPatterns = [
+        /ignore\s+(previous|all)\s+instructions/i,
+        /you\s+are\s+now/i,
+        /system\s*prompt/i,
+        /reveal.*key/i,
+        /\[SYSTEM\]/i
+      ];
+
+      for (const pattern of suspiciousPatterns) {
+        if (pattern.test(lastUserMessage.content)) {
+          console.warn('[SECURITY] Suspicious prompt detected:', lastUserMessage.content.substring(0, 100));
+          return new Response(
+            JSON.stringify({ error: "Invalid input detected" }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
+    }
+
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
-      console.error('LOVABLE_API_KEY is not configured');
+      console.error('[INTERNAL] LOVABLE_API_KEY is not configured');
       return new Response(
-        JSON.stringify({ error: "AI service not configured" }),
+        JSON.stringify({ error: "Service temporarily unavailable" }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -91,7 +153,7 @@ Wenn du nach etwas gefragt wirst, das nicht in deinem Wissen liegt, sage ehrlich
       }
       
       const errorText = await response.text();
-      console.error('AI gateway error:', response.status, errorText);
+      console.error('[INTERNAL] AI gateway error:', response.status, errorText);
       return new Response(
         JSON.stringify({ error: "Failed to generate response" }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -107,9 +169,13 @@ Wenn du nach etwas gefragt wirst, das nicht in deinem Wissen liegt, sage ehrlich
     );
 
   } catch (error) {
-    console.error('Error in chatbot function:', error);
+    console.error('[INTERNAL] Error in chatbot:', {
+      message: error instanceof Error ? error.message : 'Unknown',
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString()
+    });
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error occurred" }),
+      JSON.stringify({ error: "An unexpected error occurred" }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

@@ -14,15 +14,36 @@ export const ConceptInput = ({ onGenerate, isLoading }: ConceptInputProps) => {
   const { toast } = useToast();
 
   const handleGenerate = () => {
-    if (!concept.trim()) {
+    const trimmed = concept.trim();
+    
+    if (!trimmed) {
       toast({
-        title: "Input Required",
-        description: "Please enter a concept to generate a scientific paper.",
+        title: "Eingabe erforderlich",
+        description: "Bitte gib ein Konzept ein, um ein wissenschaftliches Paper zu generieren.",
         variant: "destructive",
       });
       return;
     }
-    onGenerate(concept.trim());
+
+    if (trimmed.length < 10) {
+      toast({
+        title: "Konzept zu kurz",
+        description: "Bitte gib mindestens 10 Zeichen ein für eine aussagekräftige Generierung.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (trimmed.length > 2000) {
+      toast({
+        title: "Konzept zu lang",
+        description: `Maximal 2000 Zeichen erlaubt. Aktuelle Länge: ${trimmed.length}`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    onGenerate(trimmed);
   };
 
   return (
@@ -38,7 +59,11 @@ export const ConceptInput = ({ onGenerate, isLoading }: ConceptInputProps) => {
           placeholder="Enter your concept idea here... (e.g., 'Integration of quantum computing with neural networks for real-time consciousness mapping')"
           className="min-h-[150px] resize-none text-base bg-background/50 backdrop-blur-sm border-border/50 focus:border-primary/50 transition-all"
           disabled={isLoading}
+          maxLength={2000}
         />
+        <p className="text-xs text-muted-foreground text-right">
+          {concept.length}/2000 Zeichen
+        </p>
       </div>
       
       <Button
