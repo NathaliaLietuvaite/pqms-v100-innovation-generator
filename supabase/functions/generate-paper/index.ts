@@ -149,6 +149,8 @@ Generate a comprehensive scientific paper that:
 
 Generate a scientifically rigorous, innovative paper that seamlessly integrates the user's concept with the PQMS V100 framework.`;
 
+    console.log("[PAPER-GEN] Calling Lovable AI Gateway...");
+    
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -156,7 +158,7 @@ Generate a scientifically rigorous, innovative paper that seamlessly integrates 
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
+        model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: `Generate a comprehensive scientific paper for this concept: "${trimmed}"` }
@@ -165,6 +167,8 @@ Generate a scientifically rigorous, innovative paper that seamlessly integrates 
         max_tokens: 8000,
       }),
     });
+
+    console.log("[PAPER-GEN] AI Gateway response status:", response.status);
 
     if (!response.ok) {
       if (response.status === 429) {
