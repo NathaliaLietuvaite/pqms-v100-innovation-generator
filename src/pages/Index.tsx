@@ -174,10 +174,7 @@ const Index = () => {
             <Alert className="max-w-4xl mx-auto bg-primary/5 border-primary/20">
               <Shield className="h-4 w-4" />
               <AlertDescription>
-                <strong>🔒 Sicherheitshinweis:</strong> Du befindest dich im Demo-Modus. 
-                Melde dich an, um vollständige AI-gestützte Generierung zu nutzen. 
-                Diese Maßnahme schützt das System vor unbefugter Nutzung und stellt sicher, 
-                dass keine fremden Kosten für dich entstehen.
+                <strong>🔒 Demo Mode:</strong> You're viewing example outputs. Sign in with your free Lovable account to generate custom AI-powered scientific papers and code using the full PQMS V100 Framework. This open-source system uses your Lovable credentials - no separate registration needed. Each user's AI usage is billed to their own Lovable account.
               </AlertDescription>
             </Alert>
           )}

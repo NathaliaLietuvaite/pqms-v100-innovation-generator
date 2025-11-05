@@ -45,9 +45,9 @@ serve(async (req) => {
       );
     }
 
-    if (trimmed.length > 2000) {
+    if (trimmed.length > 5000) {
       return new Response(
-        JSON.stringify({ error: "Concept too long (maximum 2000 characters)" }),
+        JSON.stringify({ error: "Concept too long (maximum 5000 characters)" }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
