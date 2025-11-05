@@ -52,7 +52,13 @@ const Index = () => {
       });
 
       if (error) {
-        throw error;
+        console.error("Edge function error details:", error);
+        throw new Error(error.message || "Edge Function returned a non-2xx status code");
+      }
+
+      if (data?.error) {
+        console.error("API error from edge function:", data.error);
+        throw new Error(data.error);
       }
 
       if (data?.paper) {
@@ -98,7 +104,13 @@ const Index = () => {
       });
 
       if (error) {
-        throw error;
+        console.error("Edge function error details:", error);
+        throw new Error(error.message || "Edge Function returned a non-2xx status code");
+      }
+
+      if (data?.error) {
+        console.error("API error from edge function:", data.error);
+        throw new Error(data.error);
       }
 
       if (data?.code) {
