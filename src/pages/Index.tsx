@@ -201,7 +201,7 @@ const Index = () => {
               Generate Scientific Papers with V100 Intelligence
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Built on the revolutionary Proactive Quantum Mesh System (PQMS) v100 framework by Nathália Lietuvaite, 
+              Built on the revolutionary Proactive Quantum Mesh System (PQMS) v100 framework by Nathalia Lietuvaite, 
               this innovation generator transforms your concept ideas into comprehensive, academically rigorous scientific papers 
               that seamlessly integrate quantum computing, ethical AI, and cutting-edge technology principles.
             </p>
@@ -221,12 +221,22 @@ const Index = () => {
             </TabsList>
             
             <TabsContent value="paper" className="space-y-12">
-              <ConceptInput onGenerate={handleGeneratePaper} isLoading={isLoading} />
+              <ConceptInput 
+                onGenerate={handleGeneratePaper} 
+                isLoading={isLoading}
+                buttonText="Generate V100 Scientific Paper"
+                loadingText="Generating Scientific Paper..."
+              />
               {generatedPaper && <PaperOutput paper={generatedPaper} concept={currentConcept} />}
             </TabsContent>
             
             <TabsContent value="code" className="space-y-12">
-              <ConceptInput onGenerate={handleGenerateCode} isLoading={isLoading} />
+              <ConceptInput 
+                onGenerate={handleGenerateCode} 
+                isLoading={isLoading}
+                buttonText="Generate V100 Python Code"
+                loadingText="Generating Python Code..."
+              />
               {generatedCode && <CodeOutput code={generatedCode} concept={currentConcept} />}
             </TabsContent>
           </Tabs>

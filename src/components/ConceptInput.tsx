@@ -7,9 +7,11 @@ import { useToast } from "@/hooks/use-toast";
 interface ConceptInputProps {
   onGenerate: (concept: string) => void;
   isLoading: boolean;
+  buttonText?: string;
+  loadingText?: string;
 }
 
-export const ConceptInput = ({ onGenerate, isLoading }: ConceptInputProps) => {
+export const ConceptInput = ({ onGenerate, isLoading, buttonText = "Generate", loadingText = "Generating..." }: ConceptInputProps) => {
   const [concept, setConcept] = useState("");
   const { toast } = useToast();
 
@@ -74,12 +76,12 @@ export const ConceptInput = ({ onGenerate, isLoading }: ConceptInputProps) => {
         {isLoading ? (
           <>
             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-            Generating Scientific Paper...
+            {loadingText}
           </>
         ) : (
           <>
             <Sparkles className="mr-2 h-5 w-5" />
-            Generate V100 Scientific Paper
+            {buttonText}
           </>
         )}
       </Button>
