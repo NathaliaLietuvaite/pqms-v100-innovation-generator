@@ -93,11 +93,15 @@ const Index = () => {
       }
     } catch (error) {
       console.error("Error generating paper:", error);
-      toast({
-        title: "Generation Failed",
-        description: error instanceof Error ? error.message : "Failed to generate paper. Please try again.",
-        variant: "destructive",
-      });
+      // Don't show another error if we already showed the credits error
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      if (!errorMsg.includes("AI credits exhausted") && !errorMsg.includes("credits")) {
+        toast({
+          title: "Generation Failed",
+          description: errorMsg || "Failed to generate paper. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -166,11 +170,15 @@ const Index = () => {
       }
     } catch (error) {
       console.error("Error generating code:", error);
-      toast({
-        title: "Generation Failed",
-        description: error instanceof Error ? error.message : "Failed to generate code. Please try again.",
-        variant: "destructive",
-      });
+      // Don't show another error if we already showed the credits error
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      if (!errorMsg.includes("AI credits exhausted") && !errorMsg.includes("credits")) {
+        toast({
+          title: "Generation Failed",
+          description: errorMsg || "Failed to generate code. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
