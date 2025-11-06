@@ -18,6 +18,7 @@ const Index = () => {
   const [generatedCode, setGeneratedCode] = useState<string>("");
   const [currentConcept, setCurrentConcept] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const [testMode, setTestMode] = useState(false);
   const { toast } = useToast();
   const { user, session, loading, signOut } = useAuth();
   const navigate = useNavigate();
@@ -31,12 +32,12 @@ const Index = () => {
   };
 
   const handleGeneratePaper = async (concept: string) => {
-    if (!user || !session) {
+    if (testMode || !user || !session) {
       setGeneratedPaper(DEMO_PAPER);
-      setCurrentConcept("Demo-Beispiel");
+      setCurrentConcept(testMode ? concept : "Demo-Beispiel");
       toast({
-        title: "Demo-Modus",
-        description: "Melde dich an, um echte AI-generierte Inhalte zu erhalten.",
+        title: testMode ? "🧪 Test-Modus" : "Demo-Modus",
+        description: testMode ? "Demo-Daten werden verwendet (keine AI Credits verbraucht)" : "Melde dich an, um echte AI-generierte Inhalte zu erhalten.",
         variant: "default",
       });
       return;
@@ -108,12 +109,12 @@ const Index = () => {
   };
 
   const handleGenerateCode = async (concept: string) => {
-    if (!user || !session) {
+    if (testMode || !user || !session) {
       setGeneratedCode(DEMO_CODE);
-      setCurrentConcept("Demo-Beispiel");
+      setCurrentConcept(testMode ? concept : "Demo-Beispiel");
       toast({
-        title: "Demo-Modus",
-        description: "Melde dich an, um echte AI-generierte Inhalte zu erhalten.",
+        title: testMode ? "🧪 Test-Modus" : "Demo-Modus",
+        description: testMode ? "Demo-Daten werden verwendet (keine AI Credits verbraucht)" : "Melde dich an, um echte AI-generierte Inhalte zu erhalten.",
         variant: "default",
       });
       return;
@@ -213,6 +214,21 @@ const Index = () => {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              {user && (
+                <Button 
+                  variant={testMode ? "default" : "outline"} 
+                  size="sm" 
+                  onClick={() => {
+                    setTestMode(!testMode);
+                    toast({
+                      title: !testMode ? "🧪 Test-Modus Aktiviert" : "✅ Live-Modus Aktiviert",
+                      description: !testMode ? "Demo-Daten werden verwendet - keine Credits verbraucht" : "Echte AI-Generierung ist aktiv",
+                    });
+                  }}
+                >
+                  {testMode ? "🧪 Test-Modus" : "Test-Modus"}
+                </Button>
+              )}
               <ChatBot />
               {user ? (
                 <Button variant="outline" size="sm" onClick={handleSignOut}>
