@@ -53,6 +53,17 @@ const Index = () => {
 
       if (error) {
         console.error("Edge function error details:", error);
+        // Check if it's a credits exhausted error
+        const errorMsg = error.message || JSON.stringify(error);
+        if (errorMsg.includes("AI credits exhausted") || errorMsg.includes("credits") || errorMsg.includes("402")) {
+          toast({
+            title: "❌ AI Credits Aufgebraucht",
+            description: "Deine Lovable AI Credits sind aufgebraucht. Gehe zu: Einstellungen → Workspace → Usage → Credits hinzufügen",
+            variant: "destructive",
+            duration: 10000,
+          });
+          return;
+        }
         throw new Error(error.message || "Edge Function returned a non-2xx status code");
       }
 
@@ -115,6 +126,17 @@ const Index = () => {
 
       if (error) {
         console.error("Edge function error details:", error);
+        // Check if it's a credits exhausted error
+        const errorMsg = error.message || JSON.stringify(error);
+        if (errorMsg.includes("AI credits exhausted") || errorMsg.includes("credits") || errorMsg.includes("402")) {
+          toast({
+            title: "❌ AI Credits Aufgebraucht",
+            description: "Deine Lovable AI Credits sind aufgebraucht. Gehe zu: Einstellungen → Workspace → Usage → Credits hinzufügen",
+            variant: "destructive",
+            duration: 10000,
+          });
+          return;
+        }
         throw new Error(error.message || "Edge Function returned a non-2xx status code");
       }
 
