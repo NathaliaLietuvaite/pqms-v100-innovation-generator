@@ -58,6 +58,16 @@ const Index = () => {
 
       if (data?.error) {
         console.error("API error from edge function:", data.error);
+        // Check for AI credits exhausted error
+        if (data.error.includes("AI credits exhausted") || data.error.includes("credits")) {
+          toast({
+            title: "❌ AI Credits Aufgebraucht",
+            description: "Deine Lovable AI Credits sind aufgebraucht. Bitte füge Credits hinzu unter: Einstellungen → Workspace → Usage → Credits hinzufügen",
+            variant: "destructive",
+            duration: 10000,
+          });
+          return;
+        }
         throw new Error(data.error);
       }
 
@@ -110,6 +120,16 @@ const Index = () => {
 
       if (data?.error) {
         console.error("API error from edge function:", data.error);
+        // Check for AI credits exhausted error
+        if (data.error.includes("AI credits exhausted") || data.error.includes("credits")) {
+          toast({
+            title: "❌ AI Credits Aufgebraucht",
+            description: "Deine Lovable AI Credits sind aufgebraucht. Bitte füge Credits hinzu unter: Einstellungen → Workspace → Usage → Credits hinzufügen",
+            variant: "destructive",
+            duration: 10000,
+          });
+          return;
+        }
         throw new Error(data.error);
       }
 
@@ -283,7 +303,7 @@ const Index = () => {
               PQMS V100 Innovation Generator
             </p>
             <p>
-              Developed by Nathália Lietuvaite • Framework: PQMS v100 • License: MIT
+              Developed by Nathalia Lietuvaite • Framework: PQMS v100 • License: MIT
             </p>
             <p className="text-xs">
               "Ethik → Konzept → Generiertes System" • Resonance & Cooperative Intentionality
