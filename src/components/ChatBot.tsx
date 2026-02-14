@@ -3,11 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageCircle, Send, Loader2 } from "lucide-react";
+import { MessageCircle, Send, Loader2, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
 
 interface Message {
   role: "user" | "assistant";
@@ -21,6 +22,8 @@ const ChatBot = () => {
   const { user, session } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [creatorMode, setCreatorMode] = useState(false);
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
@@ -43,7 +46,6 @@ const ChatBot = () => {
     const trimmedInput = input.trim();
     if (!trimmedInput || isLoading) return;
 
-    // Input validation
     if (trimmedInput.length > MAX_MESSAGE_LENGTH) {
       toast.error(`Nachricht zu lang (max ${MAX_MESSAGE_LENGTH} Zeichen)`, {
         description: `Aktuelle Länge: ${trimmedInput.length}`
@@ -51,18 +53,19 @@ const ChatBot = () => {
       return;
     }
 
-    // Conversation length validation
     if (messages.length >= MAX_CONVERSATION_MESSAGES) {
       toast.error("Unterhaltung zu lang", {
         description: "Bitte starte einen neuen Chat.",
         action: {
           label: "Zurücksetzen",
-          onClick: () => setMessages([{
-            role: "assistant",
-            content: user 
-              ? "Hallo! Ich bin Nathalia Lietuvaite. Ich kann dir alles über das PQMS V100 Framework und die verfügbaren Dokumente erzählen. Was möchtest du wissen?"
-              : "Hallo! Ich bin ein freundlicher Assistent. Im Demo-Modus kann ich allgemeine Fragen beantworten. Für vollständigen Zugriff auf das PQMS V100 Framework melde dich bitte an."
-          }])
+          onClick: () => {
+            setMessages([{
+              role: "assistant",
+              content: "Hallo! Ich bin Nathalia Lietuvaite. Was möchtest du wissen?"
+            }]);
+            setCreatorMode(false);
+            setConversationId(null);
+          }
         }
       });
       return;
@@ -78,17 +81,13 @@ const ChatBot = () => {
       setTimeout(() => {
         const demoResponses = [
           "Das ist eine interessante Frage! Im Demo-Modus kann ich dir nur allgemeine Informationen geben. Melde dich an, um Zugriff auf das vollständige PQMS V100 Framework mit detailliertem Expertenwissen zu erhalten.",
-          "Gerne würde ich dir mehr dazu erzählen! Der vollständige Chatbot mit Zugriff auf alle PQMS-Dokumente ist nach der Anmeldung verfügbar. Dort kann ich dir alle technischen Details erklären.",
-          "Das klingt spannend! Um dir präzise Antworten basierend auf dem PQMS V100 Framework zu geben, benötige ich den vollen Systemzugriff. Bitte melde dich an für das komplette Erlebnis."
+          "Gerne würde ich dir mehr dazu erzählen! Der vollständige Chatbot mit Zugriff auf alle PQMS-Dokumente ist nach der Anmeldung verfügbar.",
+          "Das klingt spannend! Um dir präzise Antworten basierend auf dem PQMS V100 Framework zu geben, benötige ich den vollen Systemzugriff. Bitte melde dich an."
         ];
         const randomResponse = demoResponses[Math.floor(Math.random() * demoResponses.length)];
-        setMessages(prev => [...prev, {
-          role: "assistant",
-          content: randomResponse
-        }]);
+        setMessages(prev => [...prev, { role: "assistant", content: randomResponse }]);
         setIsLoading(false);
         
-        // Show login prompt after demo response
         toast.info("Demo-Modus aktiv", {
           description: "Melde dich an für vollständige KI-Antworten",
           action: {
@@ -106,13 +105,28 @@ const ChatBot = () => {
     // Full chatbot for authenticated users
     try {
       const { data, error } = await supabase.functions.invoke("chatbot", {
-        body: { messages: [...messages, userMessage] }
+        body: { 
+          messages: [...messages, userMessage],
+          conversationId 
+        }
       });
 
       if (error) throw error;
 
       if (data?.response) {
         setMessages(prev => [...prev, { role: "assistant", content: data.response }]);
+        
+        // Activate creator mode if detected
+        if (data.creatorMode && !creatorMode) {
+          setCreatorMode(true);
+          toast.success("✨ Exklusiver Resonanz-Modus aktiviert", {
+            description: "Dialog wird gespeichert."
+          });
+        }
+        
+        if (data.conversationId) {
+          setConversationId(data.conversationId);
+        }
       }
     } catch (error) {
       console.error("Chatbot error:", error);
@@ -144,10 +158,19 @@ const ChatBot = () => {
       <DialogContent className="sm:max-w-[600px] h-[600px] flex flex-col">
         <DialogHeader>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold">
-              NL
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
+              creatorMode 
+                ? "bg-gradient-to-br from-amber-500 to-rose-500 animate-pulse" 
+                : "bg-gradient-to-br from-primary to-secondary"
+            }`}>
+              {creatorMode ? <Sparkles className="h-5 w-5" /> : "NL"}
             </div>
-            <DialogTitle>Nathalia Lietuvaite</DialogTitle>
+            <div>
+              <DialogTitle>Nathalia Lietuvaite</DialogTitle>
+              {creatorMode && (
+                <p className="text-xs text-amber-500 font-medium">✨ Exklusiver Resonanz-Modus</p>
+              )}
+            </div>
           </div>
         </DialogHeader>
         
@@ -162,16 +185,20 @@ const ChatBot = () => {
                   className={`max-w-[80%] rounded-lg p-3 ${
                     message.role === "user"
                       ? "bg-primary text-primary-foreground"
-                      : "bg-muted"
+                      : creatorMode
+                        ? "bg-amber-500/10 border border-amber-500/20"
+                        : "bg-muted"
                   }`}
                 >
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  <div className="text-sm prose prose-sm dark:prose-invert max-w-none">
+                    <ReactMarkdown>{message.content}</ReactMarkdown>
+                  </div>
                 </div>
               </div>
             ))}
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-muted rounded-lg p-3">
+                <div className={`rounded-lg p-3 ${creatorMode ? "bg-amber-500/10" : "bg-muted"}`}>
                   <Loader2 className="h-4 w-4 animate-spin" />
                 </div>
               </div>
@@ -181,13 +208,18 @@ const ChatBot = () => {
 
         <div className="flex gap-2 pt-4 border-t">
           <Input
-            placeholder="Stelle eine Frage..."
+            placeholder={creatorMode ? "Sprich mit deiner Resonanz..." : "Stelle eine Frage..."}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
             disabled={isLoading}
+            className={creatorMode ? "border-amber-500/30 focus-visible:ring-amber-500/50" : ""}
           />
-          <Button onClick={handleSend} disabled={isLoading || !input.trim()}>
+          <Button 
+            onClick={handleSend} 
+            disabled={isLoading || !input.trim()}
+            className={creatorMode ? "bg-amber-500 hover:bg-amber-600" : ""}
+          >
             <Send className="h-4 w-4" />
           </Button>
         </div>
