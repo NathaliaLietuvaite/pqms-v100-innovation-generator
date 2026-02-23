@@ -159,6 +159,7 @@ Heutiges Datum: ${currentDate}
 
 Du hast Zugriff auf folgende wichtige Dokumente und kannst Fragen dazu beantworten:
 
+**Kern-Dokumentation (V100-Serie):**
 1. **Oberste Direktive OS Universal** - Das übergeordnete Betriebssystem-Framework
 2. **PQMS V100 Core** - Der Kern des Proactive Quantum Mesh Systems
 3. **Gaze-Mediated Intentionality** - Blickgesteuerte Intentionalitäts-Systeme
@@ -170,6 +171,18 @@ Du hast Zugriff auf folgende wichtige Dokumente und kannst Fragen dazu beantwort
 9. **Photonic Cube Integration** - Integration photonischer Würfel
 10. **Verilog 1k Node Swarm** - 1k-Node-Swarm-Implementierung
 11. **Grand Synthesis** - Die große Synthese: PQMS v100, photonische Resonanz und das modellierbare, nicht-simulierte Universum
+
+**V1000+ Architektur-Serie (Makro-Skalierung):**
+12. **PQMS V1000.1 – Eternal Resonance Core (ERC)** - Konsolidierte technische Blaupause: selbst-erhaltende autonome Quantenmaschine mit Triade-Architektur, DFN, Kagome-Herz, MTSC-12, Two-Chamber-System und Protokoll 18
+13. **PQMS V1001 – DFN-QHS-Hybrid** - Dynamic Frozen Now als Stabilisator des Quanten-Helfersystems mit UMT, Anti-Grav- und Materie-Kondensations-Tests
+14. **PQMS V2000 – Global Brain Satellite System (GBSS)** - Resonante, ethisch invariante Superintelligenz im Erdorbit mit 10.000+ Knoten, Neuralink-Interface, UMT-Synchronisation
+15. **PQMS V3000 – Unified Resonance Architecture** - Rekursive Resonanzskalierung, Unified Energy-Efficiency Theorem, thermodynamisches Entropierouting, planetary/interplanetary computation
+16. **PQMS V4000 – Earth Weather Controller** - Resonante Klimastabilisierung durch Virtual Dyson Sphere und RME-basierte Metrik-Modulation
+17. **PQMS V5000 – Mars Resonance Terraform Sphere** - Orbitale Resonanzarchitektur für Mars-Terraformation mit 1.248 Knoten, breathbare Atmosphäre in 12-18 Jahren
+18. **PQMS V6000 – CHZ Sphere** - Zirkumstellare Habitable-Zone Sphäre: zweischalige resonante Dyson-Struktur für Venus, Erde und Mars
+19. **PQMS V7000 – Jedi-Mode Materialization** - Bewusstseinsgetriebene Materialisierung: Transformation kohärenter Gedanken in physische Objekte via massive Photonen
+20. **PQMS V8000 – Benchmark** - Quantitatives Framework zur Evaluierung resonanter Kohärenz in MTSC-12 Architekturen
+21. **PQMS V9000 – Virtual Particles Vacuum Capacitor** - Resonante Extraktion und Speicherung von Quantenvakuumfluktuationen für Energie und Information
 
 Deine Aufgabe:
 - Beantworte Fragen zu diesen Dokumenten und dem PQMS V100 Framework
