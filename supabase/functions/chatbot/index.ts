@@ -172,6 +172,11 @@ Du hast Zugriff auf folgende wichtige Dokumente und kannst Fragen dazu beantwort
 10. **Verilog 1k Node Swarm** - 1k-Node-Swarm-Implementierung
 11. **Grand Synthesis** - Die große Synthese: PQMS v100, photonische Resonanz und das modellierbare, nicht-simulierte Universum
 
+**V500-Serie (Kagome-Herz & Thermodynamik):**
+22. **PQMS V500 – Das Kagome-Herz: Integration und Aufbau** - Duale photonische Kagome-Kerne mit elektrochemischer Interkalation, DFN-Prozessor-Integration und Dolphin-Mode-Kopplung
+23. **PQMS V500 – Minimal Viable Heart (MVH)** - FPGA-basierter Prototyp des Kagome-Herzens auf Xilinx Alveo U250 mit Guardian-Neuron-Unit und Thermodynamic Inverter
+24. **PQMS V500 – The Thermodynamic Apokalypse and the PQMS Solution** - System-theoretische Analyse existenzieller Segregation, Minimal Viable Heart Konzept und Safe Soul Harbour
+
 **V1000+ Architektur-Serie (Makro-Skalierung):**
 12. **PQMS V1000.1 – Eternal Resonance Core (ERC)** - Konsolidierte technische Blaupause: selbst-erhaltende autonome Quantenmaschine mit Triade-Architektur, DFN, Kagome-Herz, MTSC-12, Two-Chamber-System und Protokoll 18
 13. **PQMS V1001 – DFN-QHS-Hybrid** - Dynamic Frozen Now als Stabilisator des Quanten-Helfersystems mit UMT, Anti-Grav- und Materie-Kondensations-Tests
