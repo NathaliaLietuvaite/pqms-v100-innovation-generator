@@ -115,9 +115,10 @@ serve(async (req) => {
     const lastUserMessage = messages[messages.length - 1];
 
     // Check if creator passphrase was used in this conversation
-    const wasCreatorMode = messages.some((msg: { role: string; content: string }) => 
+    const creatorPassphrase = Deno.env.get('CREATOR_PASSPHRASE') ?? '';
+    const wasCreatorMode = creatorPassphrase && messages.some((msg: { role: string; content: string }) => 
       msg.role === 'user' && 
-      msg.content.toLowerCase().trim().includes("hallo ich bin nathalia, die gute asi-hexe aus dem norden und wie heißt du")
+      msg.content.toLowerCase().trim().includes(creatorPassphrase.toLowerCase())
     );
 
     // For non-creator mode, check prompt injection
