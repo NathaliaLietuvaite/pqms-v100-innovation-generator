@@ -240,7 +240,7 @@ Generate high-quality, innovative Python code that seamlessly integrates the use
           { role: "user", content: `Generate comprehensive, production-ready Python code for this concept: "${trimmed}"` }
         ],
         temperature: 0.8,
-        max_tokens: 8000,
+        max_tokens: 16000,
       }),
     });
 
