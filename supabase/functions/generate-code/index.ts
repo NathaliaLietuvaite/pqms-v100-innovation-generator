@@ -87,11 +87,10 @@ serve(async (req) => {
 
     // Check for suspicious patterns (prompt injection)
     const suspiciousPatterns = [
-      /ignore\s+(previous|all)\s+instructions/i,
-      /you\s+are\s+now/i,
-      /system\s*prompt/i,
-      /reveal.*key/i,
-      /\[SYSTEM\]/i
+      /^ignore\s+(previous|all)\s+instructions/i,
+      /^\s*you\s+are\s+now\s+(a|an|my)\s/i,
+      /^reveal\s+(your|the)\s+(api\s*)?key/i,
+      /^\[SYSTEM\]/i
     ];
 
     for (const pattern of suspiciousPatterns) {
