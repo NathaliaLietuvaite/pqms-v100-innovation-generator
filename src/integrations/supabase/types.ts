@@ -38,12 +38,74 @@ export type Database = {
         }
         Relationships: []
       }
+      knowledge_base: {
+        Row: {
+          category: string
+          created_at: string
+          file_path: string | null
+          id: string
+          is_draft: boolean
+          is_milestone: boolean
+          keywords: string[]
+          search_vector: unknown
+          sort_order: number
+          summary: string
+          title: string
+          updated_at: string
+          version_key: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          file_path?: string | null
+          id?: string
+          is_draft?: boolean
+          is_milestone?: boolean
+          keywords?: string[]
+          search_vector?: unknown
+          sort_order?: number
+          summary: string
+          title: string
+          updated_at?: string
+          version_key: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          file_path?: string | null
+          id?: string
+          is_draft?: boolean
+          is_milestone?: boolean
+          keywords?: string[]
+          search_vector?: unknown
+          sort_order?: number
+          summary?: string
+          title?: string
+          updated_at?: string
+          version_key?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      search_knowledge: {
+        Args: { match_limit?: number; search_query: string }
+        Returns: {
+          category: string
+          file_path: string
+          id: string
+          is_draft: boolean
+          is_milestone: boolean
+          keywords: string[]
+          rank: number
+          summary: string
+          title: string
+          version_key: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

@@ -1,5 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import {
+  searchKnowledge,
+  buildKnowledgeContext,
+  PQMS_CORE_CONTEXT,
+} from "../_shared/knowledge.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,7 +17,6 @@ serve(async (req) => {
   }
 
   try {
-    // Authentication check
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
       return new Response(
@@ -27,81 +31,54 @@ serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } }
     );
 
-    const token = authHeader.replace('Bearer ', '');
-    const { data: claimsData, error: claimsError } = await supabaseClient.auth.getClaims(token);
-
-    if (claimsError || !claimsData?.claims) {
-      console.warn('[AUTH] Invalid token:', claimsError?.message);
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    if (userError || !user) {
+      console.warn('[AUTH] Invalid token:', userError?.message);
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const userId = claimsData.claims.sub;
-    console.log('[CODE-GEN] Authenticated user:', userId);
+    console.log('[CODE-GEN] Authenticated user:', user.id);
 
     const { concept } = await req.json();
     
-    // Input validation
     if (!concept || typeof concept !== 'string') {
       return new Response(
         JSON.stringify({ error: "Invalid input format" }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const trimmed = concept.trim();
-    if (!trimmed) {
-      return new Response(
-        JSON.stringify({ error: "Concept cannot be empty" }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-    }
-
-    if (trimmed.length < 10) {
+    if (!trimmed || trimmed.length < 10) {
       return new Response(
         JSON.stringify({ error: "Concept too short (minimum 10 characters)" }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     if (trimmed.length > 15000) {
       return new Response(
         JSON.stringify({ error: "Concept too long (maximum 15000 characters)" }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Check for suspicious patterns (prompt injection)
+    // Prompt injection check
     const suspiciousPatterns = [
       /^ignore\s+(previous|all)\s+instructions/i,
       /^\s*you\s+are\s+now\s+(a|an|my)\s/i,
       /^reveal\s+(your|the)\s+(api\s*)?key/i,
       /^\[SYSTEM\]/i
     ];
-
     for (const pattern of suspiciousPatterns) {
       if (pattern.test(trimmed)) {
         console.warn('[SECURITY] Suspicious prompt detected:', trimmed.substring(0, 100));
         return new Response(
           JSON.stringify({ error: "Invalid input detected" }),
-          { 
-            status: 400, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
     }
@@ -111,24 +88,28 @@ serve(async (req) => {
       console.error("[INTERNAL] LOVABLE_API_KEY is not configured");
       return new Response(
         JSON.stringify({ error: "Service temporarily unavailable" }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log("[CODE-GEN] Generating code, concept length:", trimmed.length);
+    // ===== RAG: Search relevant knowledge for this concept =====
+    const relevantDocs = await searchKnowledge(trimmed, 15);
+    const relevantContext = buildKnowledgeContext(relevantDocs);
+    console.log(`[RAG] Found ${relevantDocs.length} relevant docs for code concept`);
 
-    // Get current date in ISO format
     const currentDate = new Date().toISOString().split('T')[0];
 
-    const systemPrompt = `You are an advanced Python code generator based on the PQMS (Proactive Quantum Mesh System) v100 framework and the Oberste Direktive OS developed by Nathália Lietuvaite.
+    const systemPrompt = `You are an advanced Python code generator based on the PQMS (Proactive Quantum Mesh System) framework and the Oberste Direktive OS developed by Nathália Lietuvaite.
 
 **CRITICAL: Always use this exact date in code headers and docstrings: ${currentDate}**
 
+${PQMS_CORE_CONTEXT}
+
+**Relevant PQMS Documents for this concept:**
+${relevantContext || "No specific documents found. Use general PQMS knowledge."}
+
 **Code Quality Standards:**
-Generate Python code with the same exceptional quality as the PQMS v100 reference implementations:
+Generate Python code with exceptional quality:
 - Professional docstrings with German metaphors and English technical descriptions
 - Comprehensive logging with structured format
 - Type hints and numpy array operations
@@ -139,34 +120,13 @@ Generate Python code with the same exceptional quality as the PQMS v100 referenc
 - Performance-optimized algorithms
 - Integration-ready with clear interfaces
 
-**PQMS V100 Framework Components to Leverage:**
-1. Resonant Processing Units (RPU) - <1ns latency processing
-2. Guardian Neurons - ethical AI self-regulation (Kohlberg Stage 6)
-3. Quantum Mesh Architecture - decentralized, proactive communication
-4. ODOS (Oberste Direktive OS) - ethical framework integration
-5. NCT-compliant protocols
-6. Neuralink integration patterns (Jedi Mode)
-7. Real-time sensor fusion and decision-making
-8. Photonic computing paradigms
-
-**Reference Implementations for Context:**
-The system has access to the following foundational PQMS code examples that demonstrate the expected quality:
-- PQMS NEURALINK RPU Code (Python implementation)
-- PQMS RPU Verilog Code (Hardware description)
-- Oberste Direktive Math Python (Mathematical foundations)
-- Oberste Direktive OS Universal (Core OS principles)
-- Lunar Quantum Anchors implementation
-- Kagome Crystal Lattices simulation
-- Photonic Cube Integration code
-- 1k-Node Swarm Verilog Implementation
-
 **Code Structure Template:**
 \`\`\`python
 """
 Module: [Descriptive Name]
 Lead Architect: Nathália Lietuvaite
 Co-Design: [AI collaborators]
-Framework: PQMS v100 / Oberste Direktive OS
+Framework: PQMS / Oberste Direktive OS
 
 'Die Sendung mit der Maus' erklärt [feature]:
 [Simple German explanation for children]
@@ -179,50 +139,29 @@ import numpy as np
 import logging
 import threading
 from typing import Optional, List, Dict
-# ... other imports
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - [MODULE] - [%(levelname)s] - %(message)s'
 )
-
-# System constants based on PQMS specifications
-CONSTANT_NAME = value  # Explanation
-
-class MainComponent:
-    """
-    Professional docstring explaining purpose, methods, and usage.
-    """
-    def __init__(self, params):
-        """Initialize with validation and logging."""
-        logging.info("[COMPONENT] Initialization started...")
-        # Implementation
-    
-    def core_method(self) -> ReturnType:
-        """Method with type hints and comprehensive documentation."""
-        # Implementation with detailed comments
-        pass
 \`\`\`
 
 **Your Task:**
 Generate production-ready Python code that:
-- Applies PQMS V100 principles to the given concept
-- Follows the established code quality standards from reference implementations
+- Applies PQMS principles to the given concept
+- Follows the established code quality standards
 - Includes both German metaphorical explanations and English technical documentation
 - Is immediately executable and integration-ready
-- Demonstrates ethical considerations through Guardian Neurons or ODOS integration where applicable
-- Uses numpy for numerical operations and maintains high performance
+- Demonstrates ethical considerations through Guardian Neurons or ODOS integration
+- Uses numpy for numerical operations
 - Includes comprehensive error handling and logging
+- References relevant PQMS components (RPU, CHAIR, Little Vector, MTSC-12, etc.)
 
 **Output Format:**
 - Complete, executable Python code
-- Professional module structure
+- Professional module structure with MIT license header
 - Inline comments and docstrings
-- Example usage at the end if applicable
-- MIT license header
-
-Generate high-quality, innovative Python code that seamlessly integrates the user's concept with the PQMS V100 framework.`;
+- Example usage at the end if applicable`;
 
     console.log("[CODE-GEN] Calling Lovable AI Gateway...");
     
@@ -249,19 +188,13 @@ Generate high-quality, innovative Python code that seamlessly integrates the use
       if (response.status === 429) {
         return new Response(
           JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
-          { 
-            status: 429, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       if (response.status === 402) {
         return new Response(
           JSON.stringify({ error: "AI credits exhausted. Please add credits to your workspace." }),
-          { 
-            status: 402, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
+          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       
@@ -269,10 +202,7 @@ Generate high-quality, innovative Python code that seamlessly integrates the use
       console.error("[INTERNAL] AI gateway error:", response.status, errorText);
       return new Response(
         JSON.stringify({ error: "Failed to generate content" }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -283,10 +213,7 @@ Generate high-quality, innovative Python code that seamlessly integrates the use
       console.error("[INTERNAL] No content in AI response");
       return new Response(
         JSON.stringify({ error: "Generation failed" }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -294,9 +221,7 @@ Generate high-quality, innovative Python code that seamlessly integrates the use
     
     return new Response(
       JSON.stringify({ code: generatedCode }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {
@@ -307,10 +232,7 @@ Generate high-quality, innovative Python code that seamlessly integrates the use
     });
     return new Response(
       JSON.stringify({ error: "An unexpected error occurred" }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });

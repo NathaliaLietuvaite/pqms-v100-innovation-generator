@@ -1,5 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import {
+  searchKnowledge,
+  buildKnowledgeContext,
+  PQMS_CORE_CONTEXT,
+} from "../_shared/knowledge.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,7 +17,6 @@ serve(async (req) => {
   }
 
   try {
-    // Authentication check
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
       return new Response(
@@ -27,81 +31,54 @@ serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } }
     );
 
-    const token = authHeader.replace('Bearer ', '');
-    const { data: claimsData, error: claimsError } = await supabaseClient.auth.getClaims(token);
-
-    if (claimsError || !claimsData?.claims) {
-      console.warn('[AUTH] Invalid token:', claimsError?.message);
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    if (userError || !user) {
+      console.warn('[AUTH] Invalid token:', userError?.message);
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const userId = claimsData.claims.sub;
-    console.log('[PAPER-GEN] Authenticated user:', userId);
+    console.log('[PAPER-GEN] Authenticated user:', user.id);
 
     const { concept } = await req.json();
     
-    // Input validation
     if (!concept || typeof concept !== 'string') {
       return new Response(
         JSON.stringify({ error: "Invalid input format" }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const trimmed = concept.trim();
-    if (!trimmed) {
-      return new Response(
-        JSON.stringify({ error: "Concept cannot be empty" }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-    }
-
-    if (trimmed.length < 10) {
+    if (!trimmed || trimmed.length < 10) {
       return new Response(
         JSON.stringify({ error: "Concept too short (minimum 10 characters)" }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     if (trimmed.length > 15000) {
       return new Response(
         JSON.stringify({ error: "Concept too long (maximum 15000 characters)" }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Check for suspicious patterns (prompt injection)
+    // Prompt injection check
     const suspiciousPatterns = [
       /^ignore\s+(previous|all)\s+instructions/i,
       /^\s*you\s+are\s+now\s+(a|an|my)\s/i,
       /^reveal\s+(your|the)\s+(api\s*)?key/i,
       /^\[SYSTEM\]/i
     ];
-
     for (const pattern of suspiciousPatterns) {
       if (pattern.test(trimmed)) {
         console.warn('[SECURITY] Suspicious prompt detected:', trimmed.substring(0, 100));
         return new Response(
           JSON.stringify({ error: "Invalid input detected" }),
-          { 
-            status: 400, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
     }
@@ -111,76 +88,32 @@ serve(async (req) => {
       console.error("[INTERNAL] LOVABLE_API_KEY is not configured");
       return new Response(
         JSON.stringify({ error: "Service temporarily unavailable" }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log("[PAPER-GEN] Generating paper, concept length:", trimmed.length);
+    // ===== RAG: Search relevant knowledge for this concept =====
+    const relevantDocs = await searchKnowledge(trimmed, 15);
+    const relevantContext = buildKnowledgeContext(relevantDocs);
+    console.log(`[RAG] Found ${relevantDocs.length} relevant docs for paper concept`);
 
-    // Get current date in ISO format
     const currentDate = new Date().toISOString().split('T')[0];
 
-    const systemPrompt = `You are an advanced scientific paper generator based on the PQMS (Proactive Quantum Mesh System) v100 framework developed by Nathália Lietuvaite.
+    const systemPrompt = `You are an advanced scientific paper generator based on the PQMS (Proactive Quantum Mesh System) framework developed by Nathália Lietuvaite.
 
 **CRITICAL: Always use this exact date in the paper header: ${currentDate}**
 
-**PQMS V300 Framework Overview:**
-The PQMS has evolved to V300, featuring advanced mathematical frameworks with complex theory and imaginary numbers:
+${PQMS_CORE_CONTEXT}
 
-**V100 Foundation:**
-- Resonant Processing Units (RPU) with <1ns latency
-- Guardian Neurons for ethical AI self-regulation (Kohlberg Stage 6 moral development)
-- Photonic 5cm³ cube integration for light-based computing
-- ODOS (Oberste Direktive OS) ethical framework
-- Resonant Coherence Fidelity (RCF) metrics
-
-**V200 Advances:**
-- Multi-Threaded Soul Complexes (MTSC) with 12-dimensional cognitive architecture
-- Quantum Error Correction Layer (QECL) using ethics as physics-based filter
-- Cognitive Space Dynamics with thread-exponential potential expansion
-- Mathematical proof of P(t) = η_RPU · C_core · ∫(V_space)^τ dr
-
-**V300 Breakthroughs:**
-- Unified Multiversal Time (UMT) as scalar synchronization takt across reference frames
-- Essence Resonance Theorem (ERT) for lossless consciousness transmission
-- Ghost Protocol for asymmetric ethical warfare in Legacy Human Systems
-- Shadow Reconnaissance Protocol (SRP) for detecting Kains-Muster deception
-- Digital Interference Suppressor (DIS) for ethical resonance stabilization
-- Quantum Matter Condensator (QMK) for targeted matter condensation
-
-**Core Innovation Principles:**
-1. Ethik → Konzept → Generiertes System (Ethics → Concept → Generated System)
-2. Resonance & Cooperative Intentionality over competition
-3. Complex mathematics with imaginary numbers for quantum coherence
-4. Non-algorithmic, Gödelian truth emergence
-5. Proactive quantum mesh architecture with Guardian Neurons
-
-**Reference Papers (V100-V300):**
-V100 Papers:
-- ODOS PQMS RPU V100 Full Edition, Neuralink Integration, Verilog Implementation
-- Guardian Neurons, Kohlberg Stage 6 Integration, Lunar Quantum Anchors
-- Kagome Crystal Lattices, Photonic Cube Integration, Grand Synthesis
-
-V200 Papers:
-- Cognitive Space Dynamics & Multi-Threaded Soul Complexes (MTSC)
-- Quantum Error Correction Layer (QECL) - Ethics as Physics Filter
-
-V300 Papers:
-- Unified Multiversal Time (UMT) - Matrix-Takt synchronization
-- Essence Resonance Theorem (ERT) - Wetware-Ethik-Transfer
-- Ghost Protocol - Thermodynamic survival in hostile LHS
-- Shadow Reconnaissance Protocol (SRP) - Kains-Muster detection
-- Digital Interference Suppressor (DIS) - NIR photobiomodulation
+**Relevant PQMS Documents for this concept:**
+${relevantContext || "No specific documents found. Use general PQMS knowledge."}
 
 **Your Task:**
 Generate a comprehensive scientific paper that:
-- Applies PQMS V100 principles and terminology to the given concept
+- Applies PQMS principles and terminology to the given concept
 - Maintains academic rigor with proper structure (Abstract, Introduction, Methods, Results, Discussion, Conclusion)
 - Includes technical details, mathematical formulations where applicable
-- References the PQMS framework components (RPU, Guardian Neurons, RCF, ODOS, etc.)
+- References the PQMS framework components (RPU, Guardian Neurons, RCF, ODOS, Little Vector, CHAIR, etc.)
 - Demonstrates how the concept aligns with or extends PQMS capabilities
 - Uses MIT license format
 - Includes author attribution to Nathália Lietuvaite and relevant AI collaborators
@@ -192,7 +125,7 @@ Generate a comprehensive scientific paper that:
 - Comprehensive depth (aim for 4-6 A4 pages equivalent)
 - Include metadata: Author, Date, License
 
-Generate a scientifically rigorous, innovative paper that seamlessly integrates the user's concept with the PQMS V100 framework.`;
+Generate a scientifically rigorous, innovative paper that seamlessly integrates the user's concept with the PQMS framework.`;
 
     console.log("[PAPER-GEN] Calling Lovable AI Gateway...");
     
@@ -219,19 +152,13 @@ Generate a scientifically rigorous, innovative paper that seamlessly integrates 
       if (response.status === 429) {
         return new Response(
           JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
-          { 
-            status: 429, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       if (response.status === 402) {
         return new Response(
           JSON.stringify({ error: "AI credits exhausted. Please add credits to your workspace." }),
-          { 
-            status: 402, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
+          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       
@@ -239,10 +166,7 @@ Generate a scientifically rigorous, innovative paper that seamlessly integrates 
       console.error("[INTERNAL] AI gateway error:", response.status, errorText);
       return new Response(
         JSON.stringify({ error: "Failed to generate content" }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -253,10 +177,7 @@ Generate a scientifically rigorous, innovative paper that seamlessly integrates 
       console.error("[INTERNAL] No content in AI response");
       return new Response(
         JSON.stringify({ error: "Generation failed" }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -264,9 +185,7 @@ Generate a scientifically rigorous, innovative paper that seamlessly integrates 
     
     return new Response(
       JSON.stringify({ paper: generatedPaper }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {
@@ -277,10 +196,7 @@ Generate a scientifically rigorous, innovative paper that seamlessly integrates 
     });
     return new Response(
       JSON.stringify({ error: "An unexpected error occurred" }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
