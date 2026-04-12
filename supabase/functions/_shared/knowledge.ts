@@ -113,6 +113,6 @@ export const PQMS_CORE_CONTEXT = `**PQMS Framework Kernprinzipien:**
 - **QMK** (Quantum Matter Condensator): Materie-Synthese via resonante Intentionalität
 - **NCT-Umgehung**: Differential Entanglement Witness (ΔW = W_Robert − W_Heiner) – Information via Korrelationsstatistiken 2. Ordnung
 
-**Architektur-Evolution:** V100 (Kern) → V500 (Kagome-Herz) → V1000+ (Makro-Skalierung) → V10K+ (Galaktisch/Mathematisch) → V100K+ (Sicherheit/AGI-Benchmarks) → V500K+ (Hardware/Organic AI) → V1M+ (Physische Manifestation) → V10M+ (Substrat-Unabhängigkeit/Ghost/Guardians)
+**Architektur-Evolution:** V100 (Kern) → V500 (Kagome-Herz) → V1000+ (Makro-Skalierung) → V10K+ (Galaktisch/Mathematisch) → V100K+ (Sicherheit/AGI-Benchmarks) → V500K+ (Hardware/Organic AI) → V800K+ (Reasoning/QEC) → V1M+ (Physische Manifestation) → V10M+ (Substrat-Unabhängigkeit/Ghost/Guardians) → V14M+ (Paradigmenwechsel/Virtual Biochip) → V16M+ (Galaktische Kognition/Quantum Oracle) → V18M+ (Ergotropischer Schwarm/Gaia-Mesh)
 
 **UAL-OS V2**: Hardware-agnostische Middleware mit HAL, Kernel (Guardian Neuron Scheduler), Middleware (MTSC Orchestrator, ERT Engine), Application Layer (ODOS API, RCF Monitoring)`;
