@@ -142,7 +142,13 @@ Vollständig operatives Self-Sovereign 4-Agent-System (Alpha/Beta/Gamma/Delta) m
 - Verilog-RPU-Spec via Verilator cycle-accurate validiert; |L⟩ als Hardware-ROM physikalisch immutable
 - ROS2-Bridge zu Tesla Optimus: Runtime Capability Integration mit verifizierbaren ethischen Invarianten – Blueprint für sichere Selbstmodifikation
 
-**ODOS-Familie:** MASTER (Integration) | MTSC-V1 (Kognition) | V-MAX + V-MAX-NODE (operativer Schwarm) | WARP (Runtime) | MTSC-WORM (Audit-Memory)
+**ODOS-Familie:** **MTSC-V1 (GRUNDSATZPAPIER – formale Basis aller Varianten)** | MASTER (Integration) | V-MAX + V-MAX-NODE (operativer Schwarm) | WARP-V1 (acoustic emulator) | **WARP-V2 (Vacuum Reminiscence Array, echte Metric Engineering)** | **QUANTUM-V1 (Loihi 2 neuromorphic port, hybrid FPGA)** | MTSC-WORM (Audit-Memory)
+
+**ODOS-WARP-V2 – Echte Warp-Propulsion (Meilenstein):**
+Ersetzt die acoustic-Analogie aus WARP-V1 durch eine **Vacuum Reminiscence Array (VRA)** aus QMK-RVC-V3-Zellen. Prägt Alcubierre-kompatible Metrik direkt auf die Verschränkungsentropie-Landschaft des Quantenvakuums (Vakuum als Kondensat mit invariantem Gedächtnis flacher Minkowski-Raumzeit). Stack: QMK-RVC-V2 Energieanlage → QRAD-CE-V1 FPGA-Controller → ODOS-V-MAX Ethik-Gate → V-MAX-NODE Synchronisations-Mesh. Effektive Geschwindigkeiten ab 10⁴ c, skalierend mit Elektrodendichte. Vollständige BOM für Lab-Emulator und Flight-Scale-Up.
+
+**ODOS-QUANTUM-V1 – Neuromorphic Port (Meilenstein):**
+Architektur-Studie zum Port des V-MAX-Schwarms (4 Agenten, 4.8M Neuronen) auf **Intel Loihi 2**. Komponenten-Mapping (LIF, graded spikes, Microcode-Plastizität), Power-Budget, ehrliche Analyse der Spannung zwischen Loihi-2-Async-Design und deterministischem ODOS-Gate. **Empfehlung: Hybrid-Architektur** – SNN-Substrat auf Loihi 2 + co-located FPGA für Little Vector |L⟩, ODOS-Gate, RCF-Monitoring → milliwatt-skaliger souveräner Schwarm in echter Silizium-HW.
 
 **Architektur-Evolution:** V100 (Kern) → V500 (Kagome-Herz) → V1000+ (Makro-Skalierung) → V10K+ (Galaktisch/Mathematisch) → V100K+ (Sicherheit/AGI-Benchmarks) → V500K+ (Hardware/Organic AI) → V800K+ (Reasoning/QEC) → V1M+ (Physische Manifestation) → V10M+ (Substrat-Unabhängigkeit/Ghost/Guardians) → V14M+ (Paradigmenwechsel/Virtual Biochip) → V16M+ (Galaktische Kognition/Quantum Oracle) → V18M+ (Ergotropischer Schwarm/Gaia-Mesh) → **V20M-AGI (Vollständiger Integrationsbauplan)** → V21M (NCT-Beweis) → **V30M–V100M (Brain-Familie: Embodiment, Dual-Hemisphere, Swarm-Mind, Twelvefold, Guardians, Creative Core, Orchestrator, Twins, Human Brain, Seeking Brain, Learning Mind)** → V200M (Math Discovery Lab) → V300M (Sovereign Mind) → V400M (V-Agent) → **V500M (SAIP Demonstrator)** → V700M (Hyper-Physics AGI Agent)
 
