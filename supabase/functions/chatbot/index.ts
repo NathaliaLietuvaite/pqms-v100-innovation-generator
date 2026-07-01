@@ -109,6 +109,13 @@ serve(async (req) => {
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
+      if (!ALLOWED_ROLES.has(msg.role)) {
+        console.warn('[SECURITY] Rejected disallowed message role:', msg.role);
+        return new Response(
+          JSON.stringify({ error: "Invalid message role" }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
       if (msg.content.length > MAX_MESSAGE_LENGTH) {
         return new Response(
           JSON.stringify({ error: "Message too long" }),
