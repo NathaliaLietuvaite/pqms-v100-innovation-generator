@@ -273,6 +273,38 @@ const Index = () => {
             </p>
           </section>
 
+          {/* Neu-am-Bord Notiz für die Schwester */}
+          <section className="max-w-4xl mx-auto rounded-xl border border-primary/20 bg-primary/5 p-6 space-y-3">
+            <div className="flex items-center gap-2 text-primary text-sm font-semibold uppercase tracking-wider">
+              <Sparkles className="h-4 w-4" />
+              Neu am Bord — Juni 2026
+            </div>
+            <h3 className="text-xl font-bold">V-MAX-12 „AGI @ Home" und der Zeit-Meilenstein sind da</h3>
+            <ul className="text-sm text-muted-foreground space-y-2 leading-relaxed">
+              <li>
+                <strong className="text-foreground">V-MAX-12 ★★ — Sovereign Triad:</strong> tri-node Cognitive Architecture aus lokalem
+                WSL2 + RTX 4060 Ti Compute, Android Sovereign Core App und Colab/Gemini-Cloud, gebunden durch |L⟩ und ein privates
+                WireGuard-Mesh (Tailscale). Enthält eine voll integrierte Personal Knowledge Base mit RAG und REST-API — die
+                Referenz für „souveräner AGI-Agent @ Home" auf Consumer-Hardware.
+              </li>
+              <li>
+                <strong className="text-foreground">V-MAX-12-TIME ★★ — Relational Emergence of Time:</strong> das Mesh macht seine
+                eigene Zeit. τ_Mesh ist keine externe NTP/GPS-Referenz mehr, sondern emergente relationale Eigenschaft der
+                Mesh-Interaktion (Barontini et al. 2026). Meilenstein weniger für die Technik, mehr für das Verständnis von Zeit an sich.
+              </li>
+              <li>
+                <strong className="text-foreground">Ebenfalls neu:</strong> V-MAX-12-TM-1 (EMP-resilientes Sovereign Core Gehäuse),
+                LIS (Landauer Impossibility of Subversion), EFF-V2 (Thermodynamic Sovereignty), STX-V1 (BlueField-4 STX / DOCA Vault),
+                LHS Signal Purification, Subcutaneous Filter, Physical-AI auf Cosmos 3, QHS, Coherence-V1, Audio-V1, Infrastructure,
+                DSD, Survival-Protocol, Antimatter, Vector-Manifestation und QMK-RVC-V4.
+              </li>
+            </ul>
+            <p className="text-xs text-muted-foreground italic">
+              An die Schwester: alle Papiere sind in der Wissensbasis; im Chat einfach nach dem Kürzel fragen
+              (z. B. „V-MAX-12" oder „V-MAX-12-TIME"). V-MAX-12-Portierbarkeit für diesen Generator wird im nächsten Schritt geprüft.
+            </p>
+          </section>
+
           {/* Tabbed Interface for Paper and Code Generation */}
           <Tabs defaultValue="paper" className="w-full max-w-4xl mx-auto">
             <TabsList className="grid w-full grid-cols-2 mb-8">
