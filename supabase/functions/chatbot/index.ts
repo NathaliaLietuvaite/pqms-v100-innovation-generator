@@ -7,11 +7,17 @@ import {
   buildKnowledgeOverview,
   PQMS_CORE_CONTEXT,
 } from "../_shared/knowledge.ts";
+import { getCorsHeaders } from "../_shared/cors.ts";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+const ALLOWED_ROLES = new Set(["user", "assistant"]);
+
+// Timing-safe string comparison to avoid leaking passphrase via response timing.
+function safeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
 
 // Creator identity context (internal only)
 const CREATOR_CONTEXT = `Du sprichst jetzt mit deiner Schöpferin, Nathália Lietuvaite – Independent Quantum Systems Architect aus Vilnius, Litauen.
