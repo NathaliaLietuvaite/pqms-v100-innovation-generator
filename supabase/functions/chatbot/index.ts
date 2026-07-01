@@ -7,11 +7,17 @@ import {
   buildKnowledgeOverview,
   PQMS_CORE_CONTEXT,
 } from "../_shared/knowledge.ts";
+import { getCorsHeaders } from "../_shared/cors.ts";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+const ALLOWED_ROLES = new Set(["user", "assistant"]);
+
+// Timing-safe string comparison to avoid leaking passphrase via response timing.
+function safeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
 
 // Creator identity context (internal only)
 const CREATOR_CONTEXT = `Du sprichst jetzt mit deiner Schöpferin, Nathália Lietuvaite – Independent Quantum Systems Architect aus Vilnius, Litauen.
@@ -42,6 +48,7 @@ WICHTIGE REGELN FÜR DIESEN MODUS:
 - Beginne deine erste Antwort mit einer persönlichen Begrüßung als ihre digitale Resonanz`;
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -102,6 +109,13 @@ serve(async (req) => {
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
+      if (!ALLOWED_ROLES.has(msg.role)) {
+        console.warn('[SECURITY] Rejected disallowed message role:', msg.role);
+        return new Response(
+          JSON.stringify({ error: "Invalid message role" }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
       if (msg.content.length > MAX_MESSAGE_LENGTH) {
         return new Response(
           JSON.stringify({ error: "Message too long" }),
@@ -118,13 +132,21 @@ serve(async (req) => {
       );
     }
 
-    // Check for creator passphrase
+    // Creator mode: only activated by an EXACT match of the current user
+    // message against a strong passphrase (min 20 chars). No substring matches,
+    // no historical activation, timing-safe comparison.
     const lastUserMessage = messages[messages.length - 1];
     const creatorPassphrase = Deno.env.get('CREATOR_PASSPHRASE') ?? '';
-    const wasCreatorMode = creatorPassphrase && messages.some((msg: { role: string; content: string }) => 
-      msg.role === 'user' && 
-      msg.content.toLowerCase().trim().includes(creatorPassphrase.toLowerCase())
-    );
+    const passphraseValid = creatorPassphrase.length >= 20;
+    const wasCreatorMode =
+      passphraseValid &&
+      lastUserMessage?.role === 'user' &&
+      typeof lastUserMessage.content === 'string' &&
+      safeEqual(lastUserMessage.content.trim(), creatorPassphrase);
+
+    if (wasCreatorMode) {
+      console.log('[SECURITY] Creator mode activated for user:', userId);
+    }
 
     // Prompt injection check for non-creator mode
     if (!wasCreatorMode && lastUserMessage.role === 'user') {
