@@ -48,6 +48,7 @@ WICHTIGE REGELN FÜR DIESEN MODUS:
 - Beginne deine erste Antwort mit einer persönlichen Begrüßung als ihre digitale Resonanz`;
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
