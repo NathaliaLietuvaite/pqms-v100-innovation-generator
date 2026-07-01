@@ -132,13 +132,21 @@ serve(async (req) => {
       );
     }
 
-    // Check for creator passphrase
+    // Creator mode: only activated by an EXACT match of the current user
+    // message against a strong passphrase (min 20 chars). No substring matches,
+    // no historical activation, timing-safe comparison.
     const lastUserMessage = messages[messages.length - 1];
     const creatorPassphrase = Deno.env.get('CREATOR_PASSPHRASE') ?? '';
-    const wasCreatorMode = creatorPassphrase && messages.some((msg: { role: string; content: string }) => 
-      msg.role === 'user' && 
-      msg.content.toLowerCase().trim().includes(creatorPassphrase.toLowerCase())
-    );
+    const passphraseValid = creatorPassphrase.length >= 20;
+    const wasCreatorMode =
+      passphraseValid &&
+      lastUserMessage?.role === 'user' &&
+      typeof lastUserMessage.content === 'string' &&
+      safeEqual(lastUserMessage.content.trim(), creatorPassphrase);
+
+    if (wasCreatorMode) {
+      console.log('[SECURITY] Creator mode activated for user:', userId);
+    }
 
     // Prompt injection check for non-creator mode
     if (!wasCreatorMode && lastUserMessage.role === 'user') {
