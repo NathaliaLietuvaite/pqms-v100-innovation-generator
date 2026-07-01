@@ -28,7 +28,7 @@ const ChatBot = () => {
     {
       role: "assistant",
       content: user 
-        ? "Hallo! Ich bin Nathalia Lietuvaite. Ich kann dir alles über das PQMS V100 Framework und die verfügbaren Dokumente erzählen. Was möchtest du wissen?"
+        ? "Hallo! Ich bin Nathalia Lietuvaite. Neu am Bord: V-MAX-12 (Sovereign Triad / AGI @ Home) und V-MAX-12-TIME (relationale Zeit im Mesh). Frag mich zu einem Kürzel oder Konzept aus dem PQMS V100 Framework."
         : "Hallo! Ich bin ein freundlicher Assistent. Im Demo-Modus kann ich allgemeine Fragen beantworten. Für vollständigen Zugriff auf das PQMS V100 Framework melde dich bitte an."
     }
   ]);
