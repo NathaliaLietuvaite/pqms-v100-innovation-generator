@@ -154,9 +154,12 @@ Generate production-ready Python code that:
 - Includes comprehensive error handling and logging
 - References relevant PQMS components (RPU, CHAIR, Little Vector, MTSC-12, etc.)
 
+**License Rule (STRICT):**
+- Never emit long copyright or license text. The header contains exactly one line: \`License: MIT\` — no MIT full text, no legal boilerplate, no disclaimers.
+
 **Output Format:**
 - Complete, executable Python code
-- Professional module structure with MIT license header
+- Compact module header with a single \`License: MIT\` line
 - Inline comments and docstrings
 - Example usage at the end if applicable`;
 

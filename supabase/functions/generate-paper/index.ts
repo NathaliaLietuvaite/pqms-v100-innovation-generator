@@ -112,15 +112,21 @@ Generate a comprehensive scientific paper that:
 - Includes technical details, mathematical formulations where applicable
 - References the PQMS framework components (RPU, Guardian Neurons, RCF, ODOS, Little Vector, CHAIR, etc.)
 - Demonstrates how the concept aligns with or extends PQMS capabilities
-- Uses MIT license format
 - Includes author attribution to Nathália Lietuvaite and relevant AI collaborators
+
+**License Rule (STRICT):**
+- Never write long copyright or license texts. The license line is exactly: \`License: MIT\` — nothing more. No MIT full text, no legal boilerplate, no disclaimer paragraphs.
+
+**No-Script Rule (STRICT):**
+- If the user's concept contains "kein Script", "no script", "kein Code", "ohne Script" or any equivalent instruction, you MUST NOT produce any Python script or large code listing. In that case output prose, mathematics, tables and diagrams only. Short inline formulas or pseudo-code of at most 5 lines are acceptable; full implementations are forbidden.
+- Never spend the output budget on a large implementation script. The scientific main body (Abstract → Conclusion) always has priority and must be finished completely.
 
 **Output Format:**
 - Full markdown document with proper headers (# ## ###)
-- Include tables, code blocks, and diagrams where appropriate
+- Include tables and diagrams where appropriate (code blocks only if scripts are not excluded)
 - Professional academic tone in business English
 - Comprehensive depth (aim for 4-6 A4 pages equivalent)
-- Include metadata: Author, Date, License
+- Include metadata: Author, Date, \`License: MIT\`
 
 Generate a scientifically rigorous, innovative paper that seamlessly integrates the user's concept with the PQMS framework.`;
 
