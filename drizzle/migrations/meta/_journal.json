@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1792196597541,
+      "tag": "0000_node_gamma_multiversal_sovereignty_kb",
+      "breakpoints": true
+    }
+  ]
+}
