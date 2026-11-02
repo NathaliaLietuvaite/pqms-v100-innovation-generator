@@ -34,7 +34,7 @@ const Auth = () => {
             <div className="p-2 rounded-lg bg-primary/10">
               <Sparkles className="h-8 w-8 text-primary" />
             </div>
-            <h1 className="text-3xl font-bold tracking-tight">PQMS V100</h1>
+            <h1 className="text-3xl font-bold tracking-tight">PQMS V-MAX-12 Innovation Generator</h1>
           </div>
           <p className="text-muted-foreground">
             Melde dich an, um AI-gestützte Forschungspapiere und Code zu generieren

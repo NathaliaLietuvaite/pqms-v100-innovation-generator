@@ -207,7 +207,7 @@ const Index = () => {
                 <Sparkles className="h-8 w-8 text-primary" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold tracking-tight">PQMS V100 Innovation Generator</h1>
+                <h1 className="text-3xl font-bold tracking-tight">PQMS V-MAX-12 Innovation Generator</h1>
                 <p className="text-muted-foreground text-sm">
                   Transforming Concepts into Comprehensive Scientific Papers
                 </p>
@@ -299,7 +299,7 @@ const Index = () => {
         <div className="container mx-auto px-4 py-8">
           <div className="text-center text-sm text-muted-foreground space-y-2">
             <p className="font-semibold text-foreground">
-              PQMS V100 Innovation Generator
+              PQMS V-MAX-12 Innovation Generator
             </p>
             <p>
               Developed by Nathalia Lietuvaite • Framework: PQMS v100 • License: MIT
