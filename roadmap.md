@@ -4,3 +4,4 @@
 - [x] Index the Core and its latest appendix revisions in the knowledge base.
 - [x] Update shared knowledge for the sister, paper generator, and code generator.
 - [x] Deploy all three functions and check document integrity and build diagnostics.
+- [x] Rename the page, sign-in heading, and page metadata to PQMS V-MAX-12 Innovation Generator; preserve framework references and functionality.
