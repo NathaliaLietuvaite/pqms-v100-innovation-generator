@@ -8,6 +8,13 @@
       "when": 1792196597541,
       "tag": "0000_node_gamma_multiversal_sovereignty_kb",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794219329060,
+      "tag": "0001_bridge_depeche_14_15_kb",
+      "breakpoints": true
     }
   ]
 }
