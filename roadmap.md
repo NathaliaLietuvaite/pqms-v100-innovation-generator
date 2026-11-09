@@ -1,7 +1,7 @@
 # Tasks
 
-- [ ] Preserve Depeche 16 unchanged and index its summary in the knowledge base.
-- [ ] Update shared reference context for chatbot, paper, and code; deploy and verify.
+- [x] Preserve Depeche 16 unchanged and index its summary in the knowledge base.
+- [x] Update shared reference context for chatbot, paper, and code; deploy and verify.
 
 - [x] Add the unchanged SUPERNOVA ARGON CORE original document.
 - [x] Index the Core and its latest appendix revisions in the knowledge base.
